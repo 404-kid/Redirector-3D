@@ -1,31 +1,39 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+  <div class="d-flex flex-column align-items-start all">
+    <div class="top d-flex flex-row justify-content-between align-items-center">
+      <div class="title">
+        <h1>Redirector</h1>
+        <div class="d-flex flex-row justify-content-between">
+          <p>version</p>
+          <p>0.001</p>
+        </div>
+      </div>
+      <router-link to="/profile"><h3>name here</h3></router-link>
     </div>
     <router-view/>
+    <router-link to="/"><h6>home</h6></router-link>
+    <ChatComponent class="mt-auto"></ChatComponent>
   </div>
 </template>
 
+<script type="text/javascript">
+import ChatComponent from '@/components/ChatComponent.vue'
+
+export default {
+  name: 'app',
+  components: {
+    ChatComponent
+  }
+}
+</script>
+
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+.top{
+  margin: 1.5rem;
+  margin-bottom: 8rem;
+  width: 97vw;
 }
-#nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
+.all{
+  height: 100vh
 }
 </style>
