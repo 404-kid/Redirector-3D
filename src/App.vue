@@ -23,6 +23,11 @@ export default {
   name: 'app',
   components: {
     ChatComponent
+  },
+  data () {
+    return {
+
+    }
   }
 }
 </script>

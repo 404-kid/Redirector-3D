@@ -1,11 +1,13 @@
 <template>
   <div class="home d-flex flex-column">
     <div class="chatOutput">
-
+      <div class="message" v-for="(msg, index) in messages" :key="index">
+        <p><span class="font-weight-bold">{{ msg.user }}: </span>{{ msg.message }}</p>
+      </div>
     </div>
-    <div class="chatInput mt-auto">
-      <input type="text" placeholder="Chat"/>
-    </div>
+    <form  @submit.prevent="sendMessage" class="chatInput mt-auto">
+      <input @keyup.enter="submit" type="text" placeholder="Chat" v-model="message"/>
+    </form>
 
   </div>
 </template>
@@ -14,13 +16,33 @@
 
 export default{
   name: 'ChatComponent',
+  computed:{
+    socket(){
+      return this.$store.state.socket
+    }
+  },
   data(){
       return {
-
+        user: 'Test',
+        message: '',
+        messages: [],
     }
   },
   methods: {
+    sendMessage(e) {
+        e.preventDefault()
 
+        this.socket.emit('SEND_MESSAGE', {
+            user: this.user,
+            message: this.message
+        })
+        this.message = ''
+    }
+  },
+  mounted() {
+      this.socket.on('MESSAGE', (data) => {
+          this.messages.push(data)
+      })
   }
 }
 
@@ -28,6 +50,14 @@ export default{
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+p{
+    margin: 0rem;
+}
+.chatOutput{
+  margin: 0rem;
+  overflow: auto;
+  word-wrap: break-word;
+}
 input{
   width: 100%;
   background-color: rgba(0, 0, 0, 0);
