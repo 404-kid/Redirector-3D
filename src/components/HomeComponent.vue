@@ -49,6 +49,7 @@ a{
 }
 .home{
   margin-left: 1.5rem;
+  margin-top: 3rem;
 }
 h1{
   font-size: 5rem;

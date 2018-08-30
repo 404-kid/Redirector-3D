@@ -1,12 +1,12 @@
 <template>
   <div class="home d-flex flex-column">
-    <div class="chatOutput">
+    <div class="chatOutput d-flex flex-column justify-content-end ">
       <div class="message" v-for="(msg, index) in messages" :key="index">
         <p><span class="font-weight-bold">{{ msg.user }}: </span>{{ msg.message }}</p>
       </div>
     </div>
-    <form  @submit.prevent="sendMessage" class="chatInput mt-auto">
-      <input @keyup.enter="submit" type="text" placeholder="Chat" v-model="message"/>
+    <form  @submit.prevent="" class="chatInput mt-auto">
+      <input @keyup.enter="sendMessage" type="text" placeholder="Chat" v-model="message"/>
     </form>
 
   </div>
@@ -19,11 +19,13 @@ export default{
   computed:{
     socket(){
       return this.$store.state.socket
+    },
+    user(){
+      return this.$store.state.user.name
     }
   },
   data(){
       return {
-        user: 'Test',
         message: '',
         messages: [],
     }
@@ -57,6 +59,7 @@ p{
   margin: 0rem;
   overflow: auto;
   word-wrap: break-word;
+  height: 100%;
 }
 input{
   width: 100%;
