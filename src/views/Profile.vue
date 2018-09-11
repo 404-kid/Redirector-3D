@@ -8,7 +8,7 @@
 // @ is an alias to /src
 
 export default {
-  name: 'Play',
+  name: 'Profile',
   components: {
 
   }

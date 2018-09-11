@@ -11,7 +11,7 @@ import CustomizeComponent from '@/components/CustomizeComponent.vue'
 import CustomizeUi from '@/components/CustomizeUi.vue'
 
 export default {
-  name: 'Play',
+  name: 'Customize',
   components: {
     CustomizeComponent,
     CustomizeUi,
@@ -23,6 +23,6 @@ export default {
 .title{
   position: absolute;
   z-index: -1;
-  top: 0;
+  top: 0px;
 }
 </style>

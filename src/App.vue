@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex flex-column align-items-start all">
-    <div class="top d-flex flex-row justify-content-between align-items-center">
+    <!-- <div class="top d-flex flex-row justify-content-between align-items-center">
       <div class="title">
         <h1>Redirector</h1>
         <div class="d-flex flex-row justify-content-between">
@@ -8,11 +8,11 @@
           <p>0.001</p>
         </div>
       </div>
-      <router-link to="/profile"><h3>name here</h3></router-link>
-    </div>
+      <router-link to="/profile"><h3>{{this.user}}</h3></router-link>
+    </div> -->
     <router-view/>
     <router-link to="/"><h6>home</h6></router-link>
-    <ChatComponent class="mt-auto"></ChatComponent>
+    <!-- <ChatComponent class="mt-auto"></ChatComponent> -->
   </div>
 </template>
 
@@ -21,6 +21,11 @@ import ChatComponent from '@/components/ChatComponent.vue'
 
 export default {
   name: 'app',
+  computed:{
+    user(){
+      return this.$store.state.user.name
+    }
+  },
   components: {
     ChatComponent
   },

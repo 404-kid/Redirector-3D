@@ -1,16 +1,22 @@
 <template>
   <div>
-    Practice
+    <PracticeMenuComponent></PracticeMenuComponent>
+
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
+import PracticeMenuComponent from '@/components/PracticeMenuComponent.vue'
 
 export default {
-  name: 'Play',
+  name: 'Practice',
   components: {
-
+    PracticeMenuComponent,
   }
 }
 </script>
+
+<style scoped>
+
+</style>

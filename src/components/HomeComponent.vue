@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <router-link to="/play"><h1 class="mnuItem">Play</h1></router-link>
+    <!-- <router-link to="/play"><h1 class="mnuItem">Play</h1></router-link> -->
     <router-link to="/practice"><h2 class="mnuItem">Practice</h2></router-link>
     <router-link to="/customize"><h3 class="mnuItem">Your Redirector</h3></router-link>
     <router-link to="/profile"><h3 class="mnuItem">Profile</h3></router-link>

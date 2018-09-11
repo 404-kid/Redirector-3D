@@ -44,12 +44,10 @@ export default{
         self.mouse.currentY = event.clientY
         if (self.mouse.activated === true) {
           if (self.mouse.startY > self.mouse.currentY) {
-            self.rotate = ((self.mouse.startY - self.mouse.currentY)/1000)
+            self.rotate = -((self.mouse.startY - self.mouse.currentY)/10)
           }else if (self.mouse.startY < self.mouse.currentY) {
-            self.rotate = ((self.mouse.startY - self.mouse.currentY)/1000)
+            self.rotate = ((self.mouse.startY - self.mouse.currentY)/10)
           }
-        }else {
-          self.rotate = 0
         }
       }
 
@@ -59,12 +57,11 @@ export default{
       }
       document.onmouseup = function(event) {
         self.mouse.activated = false
-        // self.mouse.startX = 0
       }
 
       requestAnimationFrame(render)
       function render() {
-        mesh.rotation.y += self.rotate
+        mesh.rotation.y = self.rotate
         renderer.render(scene,camera)
         requestAnimationFrame(render)
       }
