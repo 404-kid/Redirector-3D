@@ -19,6 +19,7 @@ export default{
   name: 'GameComponent',
   data(){
       return {
+        raycaster: {}
     }
   },
   mounted() {
@@ -26,6 +27,7 @@ export default{
   },
   methods: {
     init() {
+      const self = this
       THREE.PointerLockControls = function ( camera ) {
 
 			var scope = this;
@@ -95,14 +97,9 @@ export default{
 
 		//Butt
 
-
-
-
 			var camera, scene, renderer, controls;
 
 			var objects = [];
-
-			var raycaster;
 
 			var blocker = document.getElementById( 'blocker' );
 			var instructions = document.getElementById( 'instructions' );
@@ -209,7 +206,8 @@ export default{
 
 						case 37: // left
 						case 65: // a
-							moveLeft = true; break;
+							moveLeft = true;
+              break;
 
 						case 40: // down
 						case 83: // s
@@ -222,7 +220,7 @@ export default{
 							break;
 
 						case 32: // space
-							if ( canJump === true ) velocity.y += 350;
+							if ( canJump === true ) velocity.y += 50;
 							canJump = false;
 							break;
 
@@ -261,41 +259,44 @@ export default{
 				document.addEventListener( 'keydown', onKeyDown, false );
 				document.addEventListener( 'keyup', onKeyUp, false );
 
-				raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
+				self.raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
 
 				// floor
 
 				var floorGeometry = new THREE.PlaneBufferGeometry( 2000, 2000, 100, 100 );
 				floorGeometry.rotateX( - Math.PI / 2 );
 
-				// vertex displacement
 
-				var position = floorGeometry.attributes.position;
-
-				for ( var i = 0, l = position.count; i < l; i ++ ) {
-
-					vertex.fromBufferAttribute( position, i );
-
-					vertex.x += Math.random() * 20 - 10;
-					vertex.y += Math.random() * 2;
-					vertex.z += Math.random() * 20 - 10;
-
-					position.setXYZ( i, vertex.x, vertex.y, vertex.z );
-
-				}
-
-				var colors = [];
-
-				var floorMaterial = new THREE.MeshBasicMaterial( { vertexColors: THREE.VertexColors } );
-
-				var floor = new THREE.Mesh( floorGeometry, floorMaterial );
+        var redColor = {
+          color:"rgba(255,0,0,1)",
+          emissive:"rgba(255,0,0,1)",
+          reflectivity: 1,
+          metalness: 1
+        }
+        let floorMaterial = new THREE.MeshStandardMaterial({wireframe: true})
+				var floor = new THREE.Mesh(floorGeometry, floorMaterial )
 				scene.add( floor );
+
+        let geometry = new THREE.CubeGeometry(200,35,20)
+        let material = new THREE.MeshPhysicalMaterial(redColor)
+        let wallTest = new THREE.Mesh(geometry, material)
+        wallTest.position.set(0, 17.5, -250)
+
+        scene.add(wallTest)
+
+        let jumpGeometry = new THREE.CubeGeometry(200,6,20)
+        let jumpMaterial = new THREE.MeshPhysicalMaterial(redColor)
+        let jumpTest = new THREE.Mesh(jumpGeometry, jumpMaterial)
+        jumpTest.position.set(0, 3, -100)
+
+        scene.add(jumpTest)
+
+        objects.push(jumpTest)
 
 				renderer = new THREE.WebGLRenderer( {canvas: document.getElementById('three'), antialias: true} );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 
-				//
 
 
 			}
@@ -306,30 +307,29 @@ export default{
 
 				if ( controlsEnabled === true ) {
 
-					raycaster.ray.origin.copy( controls.getObject().position );
-					raycaster.ray.origin.y -= 10;
+					self.raycaster.ray.origin.copy( controls.getObject().position );
+					self.raycaster.ray.origin.y -= 10;
 
-					var intersections = raycaster.intersectObjects( objects );
+					var intersections = self.raycaster.intersectObjects( objects );
 
 					var onObject = intersections.length > 0;
 
 					var time = performance.now();
 					var delta = ( time - prevTime ) / 1000;
 
-					velocity.x -= velocity.x * 10.0 * delta;
-					velocity.z -= velocity.z * 10.0 * delta;
+					velocity.x -= velocity.x * 5.0 * delta;
+					velocity.z -= velocity.z * 5.0 * delta;
 
-					velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
+					velocity.y -= 9.8 * 15.0 * delta; // 100.0 = mass
 
 					direction.z = Number( moveForward ) - Number( moveBackward );
 					direction.x = Number( moveLeft ) - Number( moveRight );
 					direction.normalize(); // this ensures consistent movements in all directions
 
-					if ( moveForward || moveBackward ) velocity.z -= direction.z * 400.0 * delta;
-					if ( moveLeft || moveRight ) velocity.x -= direction.x * 400.0 * delta;
+					if ( moveForward || moveBackward ) velocity.z -= direction.z * 200.0 * delta;
+					if ( moveLeft || moveRight ) velocity.x -= direction.x * 200.0 * delta;
 
 					if ( onObject === true ) {
-
 						velocity.y = Math.max( 0, velocity.y );
 						canJump = true;
 
