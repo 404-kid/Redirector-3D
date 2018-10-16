@@ -1,8 +1,13 @@
 <template>
   <div >
     <div id="blocker">
+
       <div id="instructions">
+        <span style="font-size:40px">Click to play</span>
+        <br />
+        (W, A, S, D = Move, SPACE = Jump, MOUSE = Look around)
       </div>
+
     </div>
     <canvas id="three"></canvas>
   </div>
@@ -16,7 +21,7 @@ export default{
       return {
         player: {},
         walls:{},
-        celings: {},
+        celings: {},  
     }
   },
   mounted() {
@@ -183,6 +188,7 @@ export default{
 
 				scene = new THREE.Scene();
 				scene.background = new THREE.Color( 0xffffff );
+				scene.fog = new THREE.Fog( 0xffffff, 0, 750 );
 
 				let light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
 				light.position.set( 0.5, 1, 0.75 );
@@ -252,8 +258,10 @@ export default{
 
 				}
 
-				document.addEventListener( 'keydown', onKeyDown, false )
-				document.addEventListener( 'keyup', onKeyUp, false )
+				document.addEventListener( 'keydown', onKeyDown, false );
+				document.addEventListener( 'keyup', onKeyUp, false );
+
+				self.raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
 
 				// floor
 
@@ -290,6 +298,7 @@ export default{
         objects.push(jumpTest)
 
         console.log(objects)
+        console.log(self.raycaster.intersectObjects( objects ));
 				renderer = new THREE.WebGLRenderer( {canvas: document.getElementById('three'), antialias: true} );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
@@ -303,6 +312,15 @@ export default{
 				requestAnimationFrame( animate );
 
 				if ( controlsEnabled === true ) {
+
+					self.raycaster.ray.origin.copy( controls.getObject().position );
+					self.raycaster.ray.origin.y -= 10;
+
+					let intersections = self.raycaster.intersectObjects( objects );
+
+          // console.log(intersections);
+					let onObject = intersections.length > 0;
+
 
 					let time = performance.now();
 					let delta = ( time - prevTime ) / 1000
@@ -318,6 +336,12 @@ export default{
 
 					if ( moveForward || moveBackward ) velocity.z -= direction.z * 200.0 * delta;
 					if ( moveLeft || moveRight ) velocity.x -= direction.x * 200.0 * delta;
+
+					if ( onObject === true ) {
+						velocity.y = Math.max( 0, velocity.y );
+						canJump = true;
+
+					}
 
 					controls.getObject().translateX( velocity.x * delta );
 					controls.getObject().translateY( velocity.y * delta );

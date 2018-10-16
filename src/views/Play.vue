@@ -1,6 +1,7 @@
 <template>
   <div>
     <GameComponent></GameComponent>
+    <!-- <PracticeGameComponent></PracticeGameComponent> -->
   </div>
 </template>
 
