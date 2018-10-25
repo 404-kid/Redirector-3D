@@ -15,8 +15,10 @@ export default{
   data(){
       return {
         player: {},
-        walls:{},
-        celings: {},
+        walls:[],
+        celings: [],
+        floors: [],
+        objects: [],
     }
   },
   mounted() {
@@ -94,9 +96,7 @@ export default{
 
 		//Butt
 
-			let camera, scene, renderer, controls;
-
-			let objects = [];
+			let camera, scene, renderer, controls, playerBox
 
 			let blocker = document.getElementById( 'blocker' );
 			let instructions = document.getElementById( 'instructions' );
@@ -162,17 +162,103 @@ export default{
 
 			let controlsEnabled = true;
 
+      let falling = false
 			let moveForward = false;
 			let moveBackward = false;
 			let moveLeft = false;
 			let moveRight = false;
-			let canJump = false;
+			let canJump = true;
 
 			let prevTime = performance.now();
 			let velocity = new THREE.Vector3();
 			let direction = new THREE.Vector3();
 			let vertex = new THREE.Vector3();
 			let color = new THREE.Color();
+
+      function resolveCollision(obj_1, obj_2) {
+
+      }
+
+      function updatePostions(phyObj, hitBox, index) {
+        hitBox.highX = 0
+        hitBox.lowX = 0
+        hitBox.highZ = 0
+        hitBox.lowZ = 0
+        hitBox.top = 0
+        hitBox.bottom = 0
+        for (var i = 0; i < phyObj.geometry.vertices.length; i++) {
+          if (phyObj.geometry.vertices[i].x > hitBox.highX) {
+            hitBox.highX = phyObj.geometry.vertices[i].x + phyObj.position.x
+          }
+          if ( phyObj.geometry.vertices[i].x < hitBox.lowX) {
+            hitBox.lowX = phyObj.geometry.vertices[i].x + phyObj.position.x
+          }
+          if (phyObj.geometry.vertices[i].z > hitBox.highZ) {
+            hitBox.highZ = phyObj.geometry.vertices[i].z + phyObj.position.z
+          }
+          if (phyObj.geometry.vertices[i].z < hitBox.lowZ){
+            hitBox.lowZ = phyObj.geometry.vertices[i].z + phyObj.position.z
+          }
+          if (phyObj.geometry.vertices[i].y > hitBox.top){
+            hitBox.top = phyObj.geometry.vertices[i].y + phyObj.position.y
+          }
+          if (phyObj.geometry.vertices[i].y < hitBox.bottom){
+            hitBox.bottom = phyObj.geometry.vertices[i].y + phyObj.position.y
+          }
+        }
+        self.walls.splice(index, 1, hitBox)
+      }
+
+      function isCollision(obj_1, obj_2) {
+          if (obj_1.lowZ <= obj_2.highZ &&
+              obj_1.highZ >= obj_2.lowZ &&
+              obj_1.lowX <= obj_2.highX &&
+              obj_1.highX >= obj_2.lowX &&
+              obj_1.bottom <= obj_2.top &&
+              obj_1.top >= obj_2.bottom) {
+                if (obj_1.name === "player") {
+                  resolveCollision(obj_1, obj_2)
+                }
+            }
+      }
+
+      function buildColision(geo, name) {
+        let highX = 0
+        let highZ = 0
+        let lowX = 0
+        let lowZ = 0
+        let top = 0
+        let bottom = 0
+        let objectT = {}
+        for (var i = 0; i < geo.geometry.vertices.length; i++) {
+          if (geo.geometry.vertices[i].x > highX) {
+            highX = geo.geometry.vertices[i].x + geo.position.x
+          }
+          if ( geo.geometry.vertices[i].x < lowX) {
+            lowX = geo.geometry.vertices[i].x + geo.position.x
+          }
+          if (geo.geometry.vertices[i].z > highZ) {
+            highZ = geo.geometry.vertices[i].z + geo.position.z
+          }
+          if (geo.geometry.vertices[i].z < lowZ){
+            lowZ = geo.geometry.vertices[i].z + geo.position.z
+          }
+          if (geo.geometry.vertices[i].y > top){
+            top = geo.geometry.vertices[i].y + geo.position.y
+          }
+          if (geo.geometry.vertices[i].y < bottom){
+            bottom = geo.geometry.vertices[i].y + geo.position.y
+          }
+        }
+        objectT.name = name
+        objectT.highX = highX
+        objectT.highZ = highZ
+        objectT.lowX = lowX
+        objectT.lowZ = lowZ
+        objectT.top = top
+        objectT.bottom = bottom
+        self.walls.push(objectT)
+      }
 
 			init();
 			animate();
@@ -216,7 +302,7 @@ export default{
 							break;
 
 						case 32: // space
-							if ( canJump === true ) velocity.y += 50;
+							if ( canJump === true ) velocity.y += 250;
 							canJump = false;
 							break;
 
@@ -247,18 +333,12 @@ export default{
 						case 68: // d
 							moveRight = false;
 							break;
-
 					}
 
 				}
 
 				document.addEventListener( 'keydown', onKeyDown, false )
 				document.addEventListener( 'keyup', onKeyUp, false )
-
-				// floor
-
-				let floorGeometry = new THREE.PlaneBufferGeometry( 2000, 2000, 100, 100 );
-				floorGeometry.rotateX( - Math.PI / 2 );
 
 
         let redColor = {
@@ -267,33 +347,53 @@ export default{
           reflectivity: 1,
           metalness: 1
         }
+        let greenColor = {
+          color:"rgba(0,255,0,1)",
+          emissive:"rgba(0,255,0,1)",
+          reflectivity: 1,
+          metalness: 1
+        }
+        let floorGeometry = new THREE.CubeGeometry(1000,-1,1000)
         let floorMaterial = new THREE.MeshStandardMaterial({wireframe: true})
 				let floor = new THREE.Mesh(floorGeometry, floorMaterial )
 				scene.add( floor );
+        // buildColision(floor)
 
-        let geometry = new THREE.CubeGeometry(200,35,20)
-        let material = new THREE.MeshPhysicalMaterial(redColor)
-        let wallTest = new THREE.Mesh(geometry, material)
-        wallTest.position.set(0, 17.5, -250)
-
-        scene.add(wallTest)
-
-        objects.push(wallTest)
+        // let geometry = new THREE.CubeGeometry(200,35,20)
+        // let material = new THREE.MeshPhysicalMaterial(redColor)
+        // let wallTest = new THREE.Mesh(geometry, material)
+        // wallTest.position.set(0, 17.5, -250)
+        //
+        // scene.add(wallTest)
+        //
+        // // self.objects.push(wallTest)
 
         let jumpGeometry = new THREE.CubeGeometry(200,6,20)
         let jumpMaterial = new THREE.MeshPhysicalMaterial(redColor)
         let jumpTest = new THREE.Mesh(jumpGeometry, jumpMaterial)
         jumpTest.position.set(0, 3, -100)
 
+        buildColision(jumpTest, "map")
+
         scene.add(jumpTest)
 
-        objects.push(jumpTest)
 
-        console.log(objects)
+        self.objects.push(jumpTest)
+
+
+
+        let playerBoxG = new THREE.CubeGeometry(7,8,7)
+        let playerBoxM = new THREE.MeshPhysicalMaterial(greenColor)
+        self.player = new THREE.Mesh(playerBoxG, playerBoxM)
+        self.player.position.set(0,4,0)
+        scene.add(self.player)
+
+        buildColision(self.player, "player")
+        // self.objects.push(self.player)
+
 				renderer = new THREE.WebGLRenderer( {canvas: document.getElementById('three'), antialias: true} );
 				renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setSize( window.innerWidth, window.innerHeight );
-
+				renderer.setSize( window.innerWidth, window.innerHeight )
 
 
 			}
@@ -303,34 +403,40 @@ export default{
 				requestAnimationFrame( animate );
 
 				if ( controlsEnabled === true ) {
+          let time = performance.now();
+          let delta = ( time - prevTime ) / 1000
 
-					let time = performance.now();
-					let delta = ( time - prevTime ) / 1000
+          direction.z = Number( moveForward ) - Number( moveBackward );
+          direction.x = Number( moveLeft ) - Number( moveRight );
+          direction.normalize(); // this ensures consistent movements in all directions
 
-					velocity.x -= velocity.x * 5.0 * delta
-					velocity.z -= velocity.z * 5.0 * delta
+          velocity.x -= velocity.x * 5.0 * delta
+          velocity.z -= velocity.z * 5.0 * delta
 
-					velocity.y -= 9.8 * 15.0 * delta;
+          if ( moveForward || moveBackward ) velocity.z -= direction.z * 200.0 * delta;
+          if ( moveLeft || moveRight ) velocity.x -= direction.x * 200.0 * delta;
 
-					direction.z = Number( moveForward ) - Number( moveBackward );
-					direction.x = Number( moveLeft ) - Number( moveRight );
-					direction.normalize(); // this ensures consistent movements in all directions
+          for (var i = 0; i < self.walls.length; i++) {
+            if (self.walls[i].name === "player") {
+              updatePostions(self.player, self.walls[i], i)
+            }
+          }
 
-					if ( moveForward || moveBackward ) velocity.z -= direction.z * 200.0 * delta;
-					if ( moveLeft || moveRight ) velocity.x -= direction.x * 200.0 * delta;
 
-					controls.getObject().translateX( velocity.x * delta );
-					controls.getObject().translateY( velocity.y * delta );
-					controls.getObject().translateZ( velocity.z * delta );
+          for (var i = 0; i < self.walls.length; i++) {
+            for (var j = 0; j < self.walls.length; j++) {
+              if(i != j){
+                isCollision(self.walls[i],self.walls[j])
+              }
+            }
+          }
 
-					if ( controls.getObject().position.y < 10 ) {
 
-						velocity.y = 0;
-						controls.getObject().position.y = 10;
+          controls.getObject().translateX( velocity.x * delta );
+          controls.getObject().translateZ( velocity.z * delta );
 
-						canJump = true;
 
-					}
+          self.player.position.set(controls.getObject().position.x, controls.getObject().position.y - 4, controls.getObject().position.z)
 
 					prevTime = time;
 
